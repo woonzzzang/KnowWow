@@ -1,0 +1,15 @@
+.DS_Store
+.idea/
+.vscode/
+.env
+**/.env
+**/.next/
+**/node_modules/
+**/dist/
+**/build/
+**/target/
+**/__pycache__/
+**/.pytest_cache/
+**/.venv/
+*.pyc
+

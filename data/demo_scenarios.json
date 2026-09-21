@@ -1,0 +1,21 @@
+[
+  {
+    "case_id": "CASE-008",
+    "answer": "실제 설치 위치에 다른 장비가 있어서 그대로 설치할 수 없었습니다.",
+    "expected_context_name": "installation_feasibility",
+    "expected_context_value": "IMPOSSIBLE"
+  },
+  {
+    "case_id": "CASE-018",
+    "answer": "동일 사양의 대체 자재가 이미 현장에 확보되어 있었습니다.",
+    "expected_context_name": "substitute_material_availability",
+    "expected_context_value": "AVAILABLE"
+  },
+  {
+    "case_id": "CASE-024",
+    "answer": "기본설계 단계에서 선주와 합의한 변경사항을 최종 합의 메일에서 확인했습니다.",
+    "expected_context_name": "owner_approved_change",
+    "expected_context_value": "CONFIRMED"
+  }
+]
+

@@ -1,0 +1,24 @@
+[
+  {
+    "employee_id": "EMP-001",
+    "name": "김설계",
+    "department": "Accommodation Design / Piping",
+    "experience_level": "SENIOR",
+    "experience_years": 8
+  },
+  {
+    "employee_id": "EMP-002",
+    "name": "박설계",
+    "department": "Accommodation Design / Piping",
+    "experience_level": "MID",
+    "experience_years": 4
+  },
+  {
+    "employee_id": "EMP-003",
+    "name": "이설계",
+    "department": "Accommodation Design / Piping",
+    "experience_level": "JUNIOR",
+    "experience_years": 1
+  }
+]
+
