@@ -1,6 +1,7 @@
 from fastapi.testclient import TestClient
 
-from app.main import app
+from app.config import Settings
+from app.main import app, service
 
 
 client = TestClient(app)
@@ -14,7 +15,18 @@ def test_health_works_without_an_api_key():
     assert "configured" in body
 
 
-def test_ai_endpoint_explains_missing_api_key():
+def test_ai_endpoint_explains_missing_api_key(monkeypatch):
+    monkeypatch.setattr(
+        service,
+        "settings",
+        Settings(
+            _env_file=None,
+            model_provider="openai",
+            openai_api_key="",
+            google_api_key="",
+        ),
+    )
+    monkeypatch.setattr(service, "_model", None)
     payload = {
         "current_case": {
             "case_id": "CASE-008",
@@ -55,4 +67,3 @@ def test_ai_endpoint_explains_missing_api_key():
     response = client.post("/ai/micro-question", json=payload)
     assert response.status_code == 503
     assert response.json()["code"] == "AI_NOT_CONFIGURED"
-

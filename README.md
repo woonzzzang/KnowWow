@@ -136,6 +136,8 @@ API 키가 비어 있어도 Dashboard, Pattern, Gap 기능은 동작합니다. L
 
 실제 구현은 [`ai-service/app/knowledge_service.py`](./ai-service/app/knowledge_service.py), 프롬프트는 [`ai-service/app/prompts.py`](./ai-service/app/prompts.py)에 있습니다. Agent 응답의 Evidence ID는 서버가 실제 검색된 ID와 대조하며, 검증되지 않은 인용은 제거합니다.
 
+사용자에게 보이는 AI 채팅에는 `DRAWING_REVISION`, `INSTALLATION_MISSING` 같은 내부 코드를 전달하지 않습니다. 질문용 입력부터 `도면 개정`, `설치 누락`, `생산 부서로 넘겨 처리`처럼 풀어 쓰고, 모델 응답에도 같은 변환을 한 번 더 적용합니다. 용어 매핑과 출력 안전장치는 [`ai-service/app/terminology.py`](./ai-service/app/terminology.py)에 모아 두었습니다.
+
 ## 로컬 개발 실행
 
 필요 환경: Python 3.11+, Java 21, Maven 3.9+, Node.js 22+.

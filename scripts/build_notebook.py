@@ -179,20 +179,25 @@ cells = [
         from langchain_core.language_models.fake_chat_models import FakeListChatModel
         from langchain_core.output_parsers import StrOutputParser
         from langchain_core.prompts import ChatPromptTemplate
+        from app.knowledge_service import micro_question_context
+        from app.models import MicroQuestionRequest
+        from app.terminology import humanize_chat_text
 
         load_dotenv(PROJECT_ROOT / ".env")
         LIVE_MODE = bool(os.getenv("OPENAI_API_KEY", "").strip())
 
         micro_question_prompt = ChatPromptTemplate.from_messages([
             ("system", (
-                "당신은 제조 업무 Knowledge Capture Agent입니다.\n"
-                "현재 Case의 판단 이유를 추측하지 마십시오.\n"
-                "과거 처리 패턴과 현재 Action의 차이를 확인하는 짧은 질문 한 개만 만드십시오.\n"
+                "당신은 제조 현장의 경험을 기록하도록 돕는 AI입니다.\n"
+                "이번 업무의 처리 이유를 추측하지 마십시오.\n"
+                "비슷한 과거 업무의 처리와 이번 처리의 차이를 확인하는 질문 한 개만 만드십시오.\n"
                 "원인 예시를 제시하거나 답을 유도하지 마십시오.\n"
-                "과거의 다수 Action과 현재 Action을 구체적으로 언급하십시오.\n"
-                "기존 사례와 달랐던 핵심 조건을 묻는 한 문장만 출력하십시오."
+                "입력에 제공된 쉬운 한국어 표현을 그대로 사용하십시오.\n"
+                "영문 코드나 Case, Action, Context, Pattern 같은 시스템 용어는 쓰지 마십시오.\n"
+                "과거에 가장 많았던 처리와 이번 처리를 언급하고 어떤 상황이 달랐는지 물으십시오.\n"
+                "'도면 개정'은 정확히 '도면 개정'이라고 쓰고, 질문 한 문장만 출력하십시오."
             )),
-            ("human", "현재 Case:\n{current_case}\n\n관찰된 Pattern:\n{matched_pattern}"),
+            ("human", "이번 업무:\n{current_case}\n\n비슷한 과거 업무에서 관찰된 내용:\n{matched_pattern}"),
         ])
 
         if LIVE_MODE:
@@ -205,7 +210,7 @@ cells = [
             run_mode = "LIVE_MODE"
         else:
             model = FakeListChatModel(responses=[
-                "같은 조건의 과거 사례에서는 생산 이관이 많았는데, 이번에는 도면 개정을 선택하게 된 핵심 조건은 무엇이었나요?"
+                "비슷한 설치 누락 사례는 주로 생산 부서로 넘겨 처리했는데, 이번에는 도면 개정을 하게 된 상황이 무엇이 달랐나요?"
             ])
             run_mode = "DEMO_MODE (FakeListChatModel)"
 
@@ -220,17 +225,22 @@ cells = [
         r"""
         target_case = next(item for item in cases if item["case_id"] == "CASE-008")
         target_pattern = pattern_by_signature[signature(target_case)]
+        request = MicroQuestionRequest.model_validate({
+            "current_case": target_case,
+            "matched_pattern": target_pattern,
+        })
+        current_case_prompt, matched_pattern_prompt = micro_question_context(request)
 
-        question = micro_question_chain.invoke({
-            "current_case": json.dumps(target_case, ensure_ascii=False, indent=2),
-            "matched_pattern": json.dumps(target_pattern, ensure_ascii=False, indent=2),
-        }).strip()
+        question = humanize_chat_text(micro_question_chain.invoke({
+            "current_case": json.dumps(current_case_prompt, ensure_ascii=False, indent=2),
+            "matched_pattern": json.dumps(matched_pattern_prompt, ensure_ascii=False, indent=2),
+        }).strip())
 
         print("입력 Case:", target_case["case_id"])
         print("Gap:", detect_gap(target_case)["status"])
         print("LLM 질문:", question)
         """,
-        "입력 Case: CASE-008\nGap: ACTION_VARIANT\nLLM 질문: 같은 조건의 과거 사례에서는 생산 이관이 많았는데, 이번에는 도면 개정을 선택하게 된 핵심 조건은 무엇이었나요?\n",
+        "입력 Case: CASE-008\nGap: ACTION_VARIANT\nLLM 질문: 비슷한 설치 누락 사례는 주로 생산 부서로 넘겨 처리했는데, 이번에는 도면 개정을 하게 된 상황이 무엇이 달랐나요?\n",
         5,
     ),
     markdown(

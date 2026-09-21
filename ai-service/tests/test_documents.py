@@ -27,7 +27,8 @@ def test_case_document_preserves_evidence_metadata():
     document = case_document(item)
     assert document.metadata["source_id"] == "CASE-008"
     assert document.metadata["doc_type"] == "CASE"
-    assert "DRAWING_REVISION" in document.page_content
+    assert "도면 개정" in document.page_content
+    assert "DRAWING_REVISION" not in document.page_content
 
 
 def test_pattern_document_explicitly_warns_that_pattern_is_not_rule():
@@ -51,7 +52,8 @@ def test_pattern_document_explicitly_warns_that_pattern_is_not_rule():
     )
     document = pattern_document(item)
     assert document.metadata["source_id"] == "PATTERN-001"
-    assert "공식 Rule이나 정답이 아니라" in document.page_content
+    assert "공식 업무 규칙이나 정답이 아니라" in document.page_content
+    assert "TRANSFER_TO_PRODUCTION" not in document.page_content
 
 
 def test_only_verified_personal_knowledge_becomes_a_document():
@@ -74,5 +76,5 @@ def test_only_verified_personal_knowledge_becomes_a_document():
     document = knowledge_document(verified)
     assert document is not None
     assert document.metadata["source_id"] == "PK-001"
-    assert "installation_feasibility=IMPOSSIBLE" in document.page_content
-
+    assert "현장 설치 가능 여부=설치 불가능" in document.page_content
+    assert "DRAWING_REVISION" not in document.page_content

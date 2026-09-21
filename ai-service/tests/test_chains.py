@@ -1,16 +1,12 @@
 from langchain_core.language_models.fake_chat_models import FakeListChatModel
 
 from app.config import Settings
-from app.knowledge_service import KnowledgeService
+from app.knowledge_service import KnowledgeService, compact_json, micro_question_context
 from app.models import MicroQuestionRequest
 
 
-def test_micro_question_uses_lcel_chain_and_returns_only_the_question():
-    service = KnowledgeService(Settings(openai_api_key="test-key"))
-    service._model = FakeListChatModel(
-        responses=["기존 사례와 달리 도면 개정을 선택하게 된 핵심 조건은 무엇인가요?"]
-    )
-    request = MicroQuestionRequest.model_validate(
+def make_request() -> MicroQuestionRequest:
+    return MicroQuestionRequest.model_validate(
         {
             "current_case": {
                 "case_id": "CASE-008",
@@ -48,6 +44,36 @@ def test_micro_question_uses_lcel_chain_and_returns_only_the_question():
             },
         }
     )
-    question = service.make_micro_question(request)
-    assert question == "기존 사례와 달리 도면 개정을 선택하게 된 핵심 조건은 무엇인가요?"
 
+
+def test_micro_question_prompt_context_contains_only_plain_korean_terms():
+    current_case, matched_pattern = micro_question_context(make_request())
+    prompt_context = compact_json({"current_case": current_case, "matched_pattern": matched_pattern})
+
+    assert "설치 누락" in prompt_context
+    assert "도면 개정" in prompt_context
+    assert "생산 부서로 넘겨 처리" in prompt_context
+    assert "DRAWING_REVISION" not in prompt_context
+    assert "INSTALLATION_MISSING" not in prompt_context
+    assert "TRANSFER_TO_PRODUCTION" not in prompt_context
+
+
+def test_micro_question_uses_lcel_chain_and_hides_internal_terms():
+    service = KnowledgeService(Settings(openai_api_key="test-key"))
+    service._model = FakeListChatModel(
+        responses=[
+            "현재 Case의 DRAWING_REVISION은 INSTALLATION_MISSING 사례에서 "
+            "TRANSFER_TO_PRODUCTION을 했던 때와 어떤 Context가 달랐나요?"
+        ]
+    )
+    question = service.make_micro_question(make_request())
+
+    assert "도면 개정" in question
+    assert "설치 누락" in question
+    assert "생산 부서로 넘겨 처리" in question
+    assert "상황" in question
+    assert "DRAWING_REVISION" not in question
+    assert "INSTALLATION_MISSING" not in question
+    assert "TRANSFER_TO_PRODUCTION" not in question
+    assert "Case" not in question
+    assert "Context" not in question

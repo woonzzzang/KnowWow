@@ -24,6 +24,16 @@ from .models import (
     PersonalKnowledgeExtraction,
 )
 from .prompts import AGENT_SYSTEM_PROMPT, KNOWLEDGE_EXTRACTION_PROMPT, MICRO_QUESTION_PROMPT
+from .terminology import (
+    ACTION_LABELS,
+    CONSTRUCTION_STAGE_LABELS,
+    DRAWING_STATUS_LABELS,
+    ISSUE_LABELS,
+    MATERIAL_STATUS_LABELS,
+    OUTCOME_LABELS,
+    humanize_chat_text,
+    label_of,
+)
 
 
 SOURCE_ID_PATTERN = re.compile(r"\b(?:CASE|PK|PATTERN)-\d{3}\b")
@@ -39,12 +49,57 @@ def compact_json(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False, indent=2)
 
 
+def micro_question_context(request: MicroQuestionRequest) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Build a prompt payload containing only plain Korean user-facing terms."""
+
+    current_case = {
+        "문제": label_of(ISSUE_LABELS, request.current_case.issue_type, "분류되지 않은 문제"),
+        "이번에 한 처리": label_of(
+            ACTION_LABELS, request.current_case.action, "별도로 정한 방식으로 처리"
+        ),
+        "현재 알려진 상황": [
+            label_of(
+                MATERIAL_STATUS_LABELS,
+                request.current_case.context.material_status,
+                "자재 상태는 아직 확인되지 않음",
+            ),
+            label_of(
+                DRAWING_STATUS_LABELS,
+                request.current_case.context.drawing_status,
+                "도면 상태는 아직 확인되지 않음",
+            ),
+            label_of(
+                CONSTRUCTION_STAGE_LABELS,
+                request.current_case.context.construction_stage,
+                "진행 단계는 아직 확인되지 않음",
+            ),
+        ],
+    }
+    matched_pattern = {
+        "비슷한 과거 업무 수": request.matched_pattern.support_count,
+        "가장 많이 했던 처리": label_of(
+            ACTION_LABELS,
+            request.matched_pattern.majority_action,
+            "별도로 정한 방식으로 처리",
+        ),
+        "처리별 건수": {
+            label_of(ACTION_LABELS, action, "기타 방식으로 처리"): count
+            for action, count in request.matched_pattern.action_distribution.items()
+        },
+    }
+    return current_case, matched_pattern
+
+
 def case_document(item: CommentCase) -> Document:
     content = (
-        f"과거 업무 사례 {item.case_id}. 이슈 {item.issue_type}, 장비 {item.equipment}, "
-        f"시스템 {item.system}, 자재 {item.context.material_status}, 도면 {item.context.drawing_status}. "
+        f"과거 업무 사례 {item.case_id}. 문제 유형 "
+        f"{label_of(ISSUE_LABELS, item.issue_type, '분류되지 않은 문제')}, "
+        f"장비 {item.equipment}, 시스템 {item.system}, "
+        f"{label_of(MATERIAL_STATUS_LABELS, item.context.material_status, '자재 상태 미확인')}, "
+        f"{label_of(DRAWING_STATUS_LABELS, item.context.drawing_status, '도면 상태 미확인')}. "
         f"Comment: {item.comment_text} Response: {item.response_text} "
-        f"관찰 Action: {item.action}, Outcome: {item.outcome}."
+        f"관찰된 처리 방식: {label_of(ACTION_LABELS, item.action, '기타 처리')}, "
+        f"처리 결과: {label_of(OUTCOME_LABELS, item.outcome, '결과 미확인')}."
     )
     return Document(
         page_content=content,
@@ -58,13 +113,20 @@ def case_document(item: CommentCase) -> Document:
 
 
 def pattern_document(item: OrganizationPattern) -> Document:
-    distribution = ", ".join(f"{key} {value}건" for key, value in item.action_distribution.items())
+    distribution = ", ".join(
+        f"{label_of(ACTION_LABELS, key, '기타 처리')} {value}건"
+        for key, value in item.action_distribution.items()
+    )
     content = (
-        f"조직 관찰 패턴 {item.pattern_id}. 이슈 {item.signature.issue_type}, 장비 {item.signature.equipment}, "
-        f"시스템 {item.signature.system}, 자재 {item.signature.material_status}, "
-        f"도면 {item.signature.drawing_status}. 총 {item.support_count}건에서 {distribution}. "
-        f"가장 많이 관찰된 Action은 {item.majority_action}이며 비율은 {item.majority_ratio:.0%}이다. "
-        "이 패턴은 공식 Rule이나 정답이 아니라 과거 관찰 결과이다."
+        f"조직의 과거 처리 경향 {item.pattern_id}. 문제 유형 "
+        f"{label_of(ISSUE_LABELS, item.signature.issue_type, '분류되지 않은 문제')}, "
+        f"장비 {item.signature.equipment}, 시스템 {item.signature.system}, "
+        f"{label_of(MATERIAL_STATUS_LABELS, item.signature.material_status, '자재 상태 미확인')}, "
+        f"{label_of(DRAWING_STATUS_LABELS, item.signature.drawing_status, '도면 상태 미확인')}. "
+        f"총 {item.support_count}건에서 {distribution}. 가장 많이 관찰된 처리 방식은 "
+        f"{label_of(ACTION_LABELS, item.majority_action, '기타 처리')}이며 "
+        f"비율은 {item.majority_ratio:.0%}이다. "
+        "이 경향은 공식 업무 규칙이나 정답이 아니라 과거 관찰 결과이다."
     )
     return Document(
         page_content=content,
@@ -84,8 +146,10 @@ def knowledge_document(item: dict[str, Any]) -> Document | None:
     new_context = structured.get("new_context") or {}
     content = (
         f"사람이 확인한 개인 경험지식 {knowledge_id}. 담당자 {item.get('employee_id')}. "
-        f"새 판단 조건 {new_context.get('name')}={new_context.get('value')}. "
-        f"Action {structured.get('action')}. 판단 근거: {structured.get('rationale')}. "
+        f"새로 확인한 상황 {humanize_chat_text(str(new_context.get('name')))}="
+        f"{humanize_chat_text(str(new_context.get('value')))}. "
+        f"처리 방식 {humanize_chat_text(str(structured.get('action')))}. "
+        f"판단 근거: {structured.get('rationale')}. "
         f"예외: {structured.get('exception') or '명시되지 않음'}. "
         f"원문 답변: {item.get('raw_answer_text')}"
     )
@@ -153,12 +217,14 @@ class KnowledgeService:
 
     def make_micro_question(self, request: MicroQuestionRequest) -> str:
         chain = MICRO_QUESTION_PROMPT | self.model | StrOutputParser()
-        return chain.invoke(
+        current_case, matched_pattern = micro_question_context(request)
+        question = chain.invoke(
             {
-                "current_case": compact_json(request.current_case),
-                "matched_pattern": compact_json(request.matched_pattern),
+                "current_case": compact_json(current_case),
+                "matched_pattern": compact_json(matched_pattern),
             }
         ).strip()
+        return humanize_chat_text(question)
 
     def extract_knowledge(self, request: ExtractKnowledgeRequest) -> PersonalKnowledgeExtraction:
         structured_model = self.model.with_structured_output(PersonalKnowledgeExtraction)
@@ -267,7 +333,7 @@ class KnowledgeService:
         if request.employee_id:
             user_context += f"\n현재 선택된 담당자: {request.employee_id}"
         result = agent.invoke({"messages": [{"role": "user", "content": user_context}]})
-        raw_answer = str(result["messages"][-1].content)
+        raw_answer = humanize_chat_text(str(result["messages"][-1].content))
 
         cited_ids = set(SOURCE_ID_PATTERN.findall(raw_answer))
         invalid_ids = cited_ids - retrieved_ids
