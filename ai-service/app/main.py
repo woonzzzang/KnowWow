@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import logging
+
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 
@@ -8,6 +10,7 @@ from .knowledge_service import AiNotConfiguredError, KnowledgeService
 from .models import AgentChatRequest, ExtractKnowledgeRequest, IndexPayload, MicroQuestionRequest
 
 
+logger = logging.getLogger(__name__)
 settings = get_settings()
 service = KnowledgeService(settings)
 
@@ -62,6 +65,7 @@ def agent_chat(request: AgentChatRequest) -> dict[str, object]:
     except AiNotConfiguredError:
         raise
     except Exception as exception:
+        logger.exception("Knowledge Agent execution failed")
         raise HTTPException(
             status_code=502,
             detail="현재 검색된 Knowledge만으로 답변을 생성할 수 없습니다.",

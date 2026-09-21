@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
@@ -44,10 +45,20 @@ public class AiServiceClient {
                 throw new IllegalStateException("AI service returned an empty response");
             }
             return result;
+        } catch (RestClientResponseException exception) {
+            boolean missingApiKey = exception.getResponseBodyAsString().contains("AI_NOT_CONFIGURED");
+            String message = missingApiKey
+                    ? "AI API 키가 설정되지 않았습니다. 루트 .env 파일을 확인해주세요."
+                    : "AI 기능 실행 중 오류가 발생했습니다. AI Service 로그를 확인해주세요.";
+            throw new ResponseStatusException(
+                    HttpStatus.SERVICE_UNAVAILABLE,
+                    message,
+                    exception
+            );
         } catch (Exception exception) {
             throw new ResponseStatusException(
                     HttpStatus.SERVICE_UNAVAILABLE,
-                    "AI 기능을 사용할 수 없습니다. API 키와 AI Service 상태를 확인해주세요.",
+                    "AI Service에 연결할 수 없습니다. 실행 상태를 확인해주세요.",
                     exception
             );
         }

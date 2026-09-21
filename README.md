@@ -130,7 +130,7 @@ API 키가 비어 있어도 Dashboard, Pattern, Gap 기능은 동작합니다. L
 | `StrOutputParser` | 질문 한 문장 추출 | ChatMessage 객체가 UI 계약에 노출됨 |
 | `with_structured_output()` + Pydantic | 답변 → 지식 후보 | 자유 형식 답변을 안전하게 저장하기 어려움 |
 | `Document` | 검색 문서와 metadata | 출처 ID와 문서 유형을 추적하기 어려움 |
-| `OpenAIEmbeddings` + `InMemoryVectorStore` | 의미 기반 검색 | 표현이 다른 유사 경험을 찾기 어려움 |
+| `OpenAIEmbeddings` + `InMemoryVectorStore` + `NumPy` | 의미 기반 검색과 유사도 계산 | 표현이 다른 유사 경험을 찾기 어려움 |
 | `@tool` | Case/Knowledge/Pattern 검색 분리 | Agent가 어떤 근거를 조회했는지 통제하기 어려움 |
 | `create_agent()` | Knowledge Agent | 질의별 검색 순서를 동적으로 선택하기 어려움 |
 
