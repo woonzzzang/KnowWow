@@ -1,2 +1,22 @@
-[]
-
+[ {
+  "knowledge_id" : "PK-001",
+  "employee_id" : "EMP-001",
+  "source_case_ids" : [ "CASE-008" ],
+  "trigger" : {
+    "type" : "ACTION_VARIANT",
+    "pattern_id" : "PATTERN-001"
+  },
+  "question" : "이번에 도면 개정을 한 이유는 과거에 설치 누락 문제를 처리할 때 생산 부서로 넘겨 처리한 경우와 어떤 점이 달랐나요?",
+  "raw_answer_text" : "내가 도면을 잘못 그렸어",
+  "structured_knowledge" : {
+    "new_context" : {
+      "name" : "drawing_revision_reason",
+      "value" : "DRAWING_ERROR"
+    },
+    "action" : "DRAWING_REVISION",
+    "rationale" : "The reason for the drawing revision was due to a mistake in the drawing.",
+    "exception" : null
+  },
+  "verified_by_user" : true,
+  "created_at" : "2026-09-21"
+} ]
