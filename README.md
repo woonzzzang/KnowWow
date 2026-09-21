@@ -11,7 +11,7 @@ KnowFlow는 제조 업무 Comment 이력에서 반복되는 처리 패턴을 찾
 - [x] 의도적으로 설계된 Synthetic Comment 24건
 - [x] 데이터 검증 스크립트
 - [x] Spring Boot Pattern Mining / Gap Detection API
-- [ ] FastAPI + LangChain 질문·구조화·RAG Agent
+- [x] FastAPI + LangChain 질문·구조화·RAG Agent
 - [ ] Next.js 대시보드
 - [ ] Docker Compose
 - [ ] 실행 결과가 저장된 제출용 노트북
@@ -44,6 +44,25 @@ mvn test
 ```
 
 현재 테스트는 안정 패턴 4개, `CASE-008`의 6:1:1 Action 분포, 정상 Case의 인터뷰 미발생, Variant Case 탐지를 검증합니다.
+
+## AI Service 테스트
+
+```bash
+cd ai-service
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
+.venv/bin/pytest -q
+```
+
+AI Service에는 다음 LangChain 컴포넌트가 실제 실행 경로로 연결되어 있습니다.
+
+- `ChatPromptTemplate | ChatModel | StrOutputParser` Micro-question LCEL 체인
+- `with_structured_output(PersonalKnowledgeExtraction)` Pydantic 구조화
+- `Document` + `OpenAIEmbeddings` + `InMemoryVectorStore`
+- `@tool`로 정의한 Case/Knowledge/Pattern 검색 도구
+- `create_agent()` 기반 Tool-calling Agent
+
+API 키가 비어 있으면 `/health`는 정상 동작하고 LLM endpoint는 원인을 설명하는 `503 AI_NOT_CONFIGURED`를 반환합니다.
 
 LLM은 패턴 집계나 Gap 판정을 하지 않습니다. 이 단계는 항상 deterministic code에서 수행하며, LLM은 질문 생성·답변 구조화·검색 결과 설명에만 사용합니다.
 
