@@ -10,7 +10,7 @@ KnowFlow는 제조 업무 Comment 이력에서 반복되는 처리 패턴을 찾
 
 - [x] 의도적으로 설계된 Synthetic Comment 24건
 - [x] 데이터 검증 스크립트
-- [ ] Spring Boot Pattern Mining / Gap Detection API
+- [x] Spring Boot Pattern Mining / Gap Detection API
 - [ ] FastAPI + LangChain 질문·구조화·RAG Agent
 - [ ] Next.js 대시보드
 - [ ] Docker Compose
@@ -34,6 +34,17 @@ KnowFlow는 제조 업무 Comment 이력에서 반복되는 처리 패턴을 찾
 python3 scripts/validate_seed.py
 ```
 
+## Backend 테스트
+
+Maven이 설치되어 있다면 다음 명령으로 Pattern/Gap 테스트를 실행합니다.
+
+```bash
+cd backend
+mvn test
+```
+
+현재 테스트는 안정 패턴 4개, `CASE-008`의 6:1:1 Action 분포, 정상 Case의 인터뷰 미발생, Variant Case 탐지를 검증합니다.
+
 LLM은 패턴 집계나 Gap 판정을 하지 않습니다. 이 단계는 항상 deterministic code에서 수행하며, LLM은 질문 생성·답변 구조화·검색 결과 설명에만 사용합니다.
 
 ## 환경변수
@@ -52,4 +63,3 @@ API 키가 없는 상태에서도 데이터 및 Pattern/Gap 로직은 검증할 
 ## 상세 명세
 
 전체 제품 의도와 데이터 계약은 [`KnowFlow_MVP_SPEC_v2.md`](./KnowFlow_MVP_SPEC_v2.md)를 참고하세요.
-
