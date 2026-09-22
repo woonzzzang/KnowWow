@@ -54,38 +54,46 @@ LLM은 패턴 집계나 `ACTION_VARIANT` 판정을 하지 않습니다. 결정�
 ├── backend/                        # 결정론적 업무 규칙과 REST API
 ├── ai-service/                     # LangChain + FastAPI
 ├── data/                           # Synthetic JSON 데이터
-├── 3반_정다운_KnowWow.ipynb          # 실제 LLM 실행 결과를 저장한 제출 노트북
+├── 제출파일/                       # 제출용 노트북·PDF·명세서
+│   ├── 3반_정다운_KnowWow.ipynb
+│   ├── 3반_정다운_KnowWow_설명.pdf
+│   ├── 3반_정다운_서브노트.pdf
+│   ├── 3반_정다운_서브노트.pages
+│   └── KnowWow_구현_명세서.md
 ├── scripts/
 │   ├── validate_seed.py            # 데이터 불변조건 검증
 │   ├── smoke_test.py               # 실행 중 서비스 통합 검증
 │   └── run_notebook.py             # 기존 노트북 셀을 재실행하고 결과 저장
-├── docker-compose.yml
-├── KnowWow_MVP_SPEC_v2.md          # 상세 제품 명세
-└── output/pdf/KnowWow_구현_설명.pdf # 핵심 화면·실행 결과 설명
+└── docker-compose.yml
 ```
 
-## 가장 빠른 실행 방법
+## 제출 파일
 
-### 1. API 키 입력
+| 파일 | 내용 |
+|---|---|
+| [`3반_정다운_KnowWow.ipynb`](./제출파일/3반_정다운_KnowWow.ipynb) | LangChain 질문 생성·답변 구조화 코드와 저장된 실제 실행 결과. 과제의 주 제출물 |
+| [`3반_정다운_KnowWow_설명.pdf`](./제출파일/3반_정다운_KnowWow_설명.pdf) | 기획 배경, 데이터 항목, 화면 캡처, 결과·한계, 향후 개인 지식→팀 지식 흐름 |
+| [`3반_정다운_서브노트.pdf`](./제출파일/3반_정다운_서브노트.pdf) | 온톨로지 학습 내용과 KnowWow에 적용해 본 개인 정리 노트 |
+| [`3반_정다운_서브노트.pages`](./제출파일/3반_정다운_서브노트.pages) | 서브노트의 편집 가능한 Pages 원본. macOS Pages가 없으면 PDF로 읽을 수 있음 |
+| [`KnowWow_구현_명세서.md`](./제출파일/KnowWow_구현_명세서.md) | 구현 범위, 데이터 계약, 설계 의도를 담은 명세서 |
 
-루트의 `.env`에 본인 API 키를 설정합니다. 이 파일은 Git에서 제외되며 제출물에도 포함하지 않습니다.
+## 처음 클론한 뒤 실행하기
 
-```env
-OPENAI_API_KEY=
-MODEL_PROVIDER=openai
-MODEL_NAME=gpt-4o-mini
-OPENAI_EMBEDDING_MODEL=text-embedding-3-small
+Docker Desktop과 Docker Compose를 준비합니다. 기본 포트는 3000(화면), 8080(업무 API), 8000(AI API)입니다.
+
+```bash
+git clone https://github.com/woonzzzang/KnowWow.git
+cd KnowWow
+cp .env.example .env
 ```
 
-키를 교체할 때는 `OPENAI_API_KEY=` 오른쪽 값만 수정합니다.
-
-### 2. 전체 서비스 실행
-
-Docker Desktop을 실행한 뒤 프로젝트 루트에서 다음 명령을 사용합니다.
+`.env`의 `OPENAI_API_KEY=` 오른쪽에 본인 키를 입력합니다. `.env`는 Git에서 제외되며 제출 파일에도 포함하지 않습니다. 키를 넣지 않아도 업무 목록과 패턴 화면은 볼 수 있지만, AI 질문·답변·검색 호출은 실패 원인을 반환합니다.
 
 ```bash
 docker compose up --build
 ```
+
+빌드가 끝나면 `http://localhost:3000`에서 **My Work → CASE-008**을 열어 대표 흐름을 확인합니다. 처음 실행할 때는 이미지 빌드에 시간이 걸릴 수 있습니다. 제출 PDF와 노트북의 저장된 출력은 API 키 없이도 읽을 수 있습니다.
 
 | 주소 | 용도 |
 |---|---|
@@ -100,7 +108,7 @@ docker compose up --build
 docker compose down
 ```
 
-API 키가 비어 있어도 Dashboard, Pattern, Gap 기능은 동작합니다. LLM이 필요한 POST 요청은 원인을 포함한 `503 AI_NOT_CONFIGURED`를 반환합니다.
+Docker 대신 각 서비스를 개발 모드로 실행하려면 아래의 "로컬 개발 실행" 절을 따릅니다. API 키가 비어 있을 때 LLM이 필요한 POST 요청은 `503 AI_NOT_CONFIGURED`를 반환합니다.
 
 ## 핵심 시연 시나리오
 
@@ -244,13 +252,15 @@ python3 scripts/smoke_test.py
 
 ## 제출용 노트북
 
-제출 파일은 루트의 [`3반_정다운_KnowWow.ipynb`](./3반_정다운_KnowWow.ipynb)입니다. 실제 API 키로 질문 생성·답변 구조화·임베딩 셀을 끝까지 실행했고, `CASE-008` 외에 `CASE-018`, `CASE-024`도 같은 체인으로 비교한 결과가 저장돼 있습니다. 이전의 Fake 모델 출력은 제거했습니다. 코드 셀을 다시 실행해 저장하려면 프로젝트 루트에서 다음 명령을 사용합니다.
+제출 노트북은 [`제출파일/3반_정다운_KnowWow.ipynb`](./제출파일/3반_정다운_KnowWow.ipynb)입니다. 실제 API 키로 질문 생성·답변 구조화·임베딩 셀을 끝까지 실행했고, `CASE-008` 외에 `CASE-018`, `CASE-024`도 같은 체인으로 비교한 결과가 저장돼 있습니다. 이전의 Fake 모델 출력은 제거했습니다. 노트북은 프로젝트 루트 또는 `제출파일` 폴더에서 열어도 데이터 경로를 찾습니다. 저장된 결과를 다시 생성하려면 프로젝트 루트에서 다음 명령을 사용합니다(실제 API 호출이 다시 발생합니다).
 
 ```bash
+python3 -m venv ai-service/.venv
+ai-service/.venv/bin/pip install -r ai-service/requirements.txt
 ai-service/.venv/bin/python scripts/run_notebook.py
 ```
 
-실행 결과에서는 `CASE-018`의 대체 자재 확보를 의미상 포착했으나 표준 이름·값과 다르게 표현했고, `CASE-024`의 합의 메일 확인은 근거 문장에는 반영했지만 새 조건 필드는 비웠습니다. 이는 실제 모델의 구조화 한계로 노트북에 그대로 남겼습니다. 기획 배경부터 핵심 화면과 실행 결과까지 설명한 PDF는 [`output/pdf/KnowWow_구현_설명.pdf`](./output/pdf/KnowWow_구현_설명.pdf)입니다.
+실행 결과에서는 `CASE-018`의 대체 자재 확보를 의미상 포착했으나 표준 이름·값과 다르게 표현했고, `CASE-024`의 합의 메일 확인은 근거 문장에는 반영했지만 새 조건 필드는 비웠습니다. 이는 실제 모델의 구조화 한계로 노트북에 그대로 남겼습니다. 기획 배경부터 핵심 화면과 실행 결과까지 설명한 PDF는 [`제출파일/3반_정다운_KnowWow_설명.pdf`](./제출파일/3반_정다운_KnowWow_설명.pdf)입니다.
 
 PDF는 기획 배경, 예시 데이터의 비교 항목, 질문·답변 기능과 실제 실행 결과를 화면 일부를 확대해 설명하고, 마지막에 개인 경험을 팀의 참고 지식으로 발전시키는 향후 방향을 구분해 적었습니다. 다시 만들 때는 실행 중인 서비스와 macOS Chrome이 필요합니다. 먼저 `ai-service/.venv/bin/pip install reportlab pillow`로 PDF 제작 패키지를 설치하고, `node scripts/capture_pdf_assets.mjs`로 화면 일부와 노트북 출력을 캡처한 뒤 `ai-service/.venv/bin/python scripts/build_explanation_pdf.py`를 실행합니다. 웹 화면과 제출 노트북은 각각 실제 모델을 호출하므로 질문 문구는 조금 다를 수 있습니다.
 
@@ -264,4 +274,4 @@ PDF는 기획 배경, 예시 데이터의 비교 항목, 질문·답변 기능�
 - 다음 단계는 운영 DB, 영속 Vector DB, 평가 데이터셋, 승인 워크플로, LangSmith trace입니다.
 - 충분히 검증된 Context가 쌓인 이후에만 온톨로지 후보와 관계 정의를 도입하는 편이 안전합니다.
 
-상세 데이터 계약과 설계 의도는 [`KnowWow_MVP_SPEC_v2.md`](./KnowWow_MVP_SPEC_v2.md)를 참고하세요.
+상세 데이터 계약과 설계 의도는 [`제출파일/KnowWow_구현_명세서.md`](./제출파일/KnowWow_구현_명세서.md)를 참고하세요.

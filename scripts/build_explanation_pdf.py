@@ -18,7 +18,7 @@ from reportlab.platypus import Paragraph
 
 ROOT = Path(__file__).resolve().parents[1]
 ASSETS = ROOT / "tmp" / "pdfs"
-OUTPUT = ROOT / "output" / "pdf" / "KnowWow_구현_설명.pdf"
+OUTPUT = ROOT / "제출파일" / "3반_정다운_KnowWow_설명.pdf"
 PAGE_W, PAGE_H = landscape(A4)
 PAGE_COUNT = 8
 

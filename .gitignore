@@ -1,16 +1,32 @@
+# Local secrets. Keep the template tracked.
+**/.env
+**/.env.*
+!.env.example
+
+# Editor and OS files.
 .DS_Store
 .idea/
 .vscode/
-.env
-**/.env
-**/.next/
+
+# Dependencies, builds, and Python/Jupyter caches.
+**/.venv/
 **/node_modules/
+**/.next/
 **/dist/
 **/build/
 **/target/
 **/__pycache__/
 **/.pytest_cache/
-**/.venv/
-*.tsbuildinfo
+**/.mypy_cache/
+**/.ruff_cache/
+**/.ipynb_checkpoints/
 *.pyc
-tmp/pdfs/
+*.tsbuildinfo
+.coverage
+htmlcov/
+
+# Generated captures and scratch outputs; final PDFs live in 제출파일/.
+tmp/
+output/
+.knowwow-*.ipynb
+*.log

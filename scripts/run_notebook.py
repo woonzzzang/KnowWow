@@ -13,7 +13,7 @@ import tempfile
 
 
 ROOT = Path(__file__).resolve().parents[1]
-NOTEBOOK = ROOT / "3반_정다운_KnowWow.ipynb"
+NOTEBOOK = ROOT / "제출파일" / "3반_정다운_KnowWow.ipynb"
 
 
 def main() -> None:

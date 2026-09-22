@@ -105,7 +105,7 @@ async function main() {
     await waitUntil(async () => await evaluate("document.body.innerText.includes('이 건에는 추가 질문이 필요하지 않습니다')"));
     await shot("case004-no-question.png", {x: 851, y: 482, width: 718, height: 350});
 
-    const notebook = JSON.parse(await readFile(path.join(root, "3반_정다운_KnowWow.ipynb"), "utf8"));
+    const notebook = JSON.parse(await readFile(path.join(root, "제출파일", "3반_정다운_KnowWow.ipynb"), "utf8"));
     for (const [name, indexes] of [["notebook-main", [7, 8, 10]], ["notebook-compare", [14]]]) {
       const sections = indexes.map((index) => {
         const cell = notebook.cells[index];

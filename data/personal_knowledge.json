@@ -19,4 +19,25 @@
   },
   "verified_by_user" : true,
   "created_at" : "2026-09-21"
+}, {
+  "knowledge_id" : "PK-002",
+  "employee_id" : "EMP-001",
+  "source_case_ids" : [ "CASE-008" ],
+  "trigger" : {
+    "type" : "ACTION_VARIANT",
+    "pattern_id" : "PATTERN-001"
+  },
+  "question" : "기록에는 필요한 자재가 준비되어 있고 현재 도면에 문제가 없는데, 비슷한 과거 업무는 주로 생산 부서로 넘겨 처리했습니다. 이번에는 어떤 추가 상황 때문에 도면 개정이 필요했나요?",
+  "raw_answer_text" : "선주 요청으로 추가 설치 자재 있어서 개정도 나감. 생산 이관 예정",
+  "structured_knowledge" : {
+    "new_context" : {
+      "name" : "additional_installation_material",
+      "value" : "YES"
+    },
+    "action" : "DRAWING_REVISION",
+    "rationale" : "선주 요청으로 추가 설치 자재가 있어 도면 개정이 필요했다.",
+    "exception" : null
+  },
+  "verified_by_user" : true,
+  "created_at" : "2026-09-22"
 } ]
