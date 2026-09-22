@@ -250,9 +250,9 @@ python3 scripts/smoke_test.py
 ai-service/.venv/bin/python scripts/run_notebook.py
 ```
 
-실행 결과에서는 `CASE-018`의 대체 자재 확보를 의미상 포착했으나 표준 이름·값과 다르게 표현했고, `CASE-024`의 합의 메일 확인은 근거 문장에는 반영했지만 새 조건 필드는 비웠습니다. 이는 실제 모델의 구조화 한계로 노트북에 그대로 남겼습니다. 핵심 화면과 실행 결과를 짧게 설명한 PDF는 [`output/pdf/KnowWow_구현_설명.pdf`](./output/pdf/KnowWow_구현_설명.pdf)입니다.
+실행 결과에서는 `CASE-018`의 대체 자재 확보를 의미상 포착했으나 표준 이름·값과 다르게 표현했고, `CASE-024`의 합의 메일 확인은 근거 문장에는 반영했지만 새 조건 필드는 비웠습니다. 이는 실제 모델의 구조화 한계로 노트북에 그대로 남겼습니다. 기획 배경부터 핵심 화면과 실행 결과까지 설명한 PDF는 [`output/pdf/KnowWow_구현_설명.pdf`](./output/pdf/KnowWow_구현_설명.pdf)입니다.
 
-PDF를 다시 만들 때는 실행 중인 서비스와 macOS Chrome이 필요합니다. `node scripts/capture_pdf_assets.mjs`로 화면 일부와 노트북 출력을 캡처한 뒤, `ai-service/.venv/bin/python scripts/build_explanation_pdf.py`를 실행합니다. 웹 화면과 제출 노트북은 각각 실제 모델을 호출하므로 질문 문구는 조금 다를 수 있습니다.
+PDF는 기획 배경, 예시 데이터의 비교 항목, 질문·답변 기능과 실제 실행 결과를 화면 일부를 확대해 설명합니다. 다시 만들 때는 실행 중인 서비스와 macOS Chrome이 필요합니다. 먼저 `ai-service/.venv/bin/pip install reportlab pillow`로 PDF 제작 패키지를 설치하고, `node scripts/capture_pdf_assets.mjs`로 화면 일부와 노트북 출력을 캡처한 뒤 `ai-service/.venv/bin/python scripts/build_explanation_pdf.py`를 실행합니다. 웹 화면과 제출 노트북은 각각 실제 모델을 호출하므로 질문 문구는 조금 다를 수 있습니다.
 
 ## 현재 한계와 다음 단계
 

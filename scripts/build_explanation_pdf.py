@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Build the illustrated KnowWow implementation note."""
+"""Build the illustrated, non-specialist explanation of the KnowWow MVP."""
 
 from __future__ import annotations
 
 from pathlib import Path
 
+from PIL import Image
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib.styles import ParagraphStyle
@@ -19,11 +20,12 @@ ROOT = Path(__file__).resolve().parents[1]
 ASSETS = ROOT / "tmp" / "pdfs"
 OUTPUT = ROOT / "output" / "pdf" / "KnowWow_구현_설명.pdf"
 PAGE_W, PAGE_H = landscape(A4)
+PAGE_COUNT = 7
 
 INK = colors.HexColor("#222932")
-SECONDARY = colors.HexColor("#5F6873")
+SECONDARY = colors.HexColor("#596575")
 ACCENT = colors.HexColor("#205B9E")
-RULE = colors.HexColor("#CFD4DA")
+RULE = colors.HexColor("#CAD2DC")
 
 
 def setup_fonts() -> None:
@@ -35,7 +37,7 @@ def setup_fonts() -> None:
 
 def paragraph(
     c: canvas.Canvas,
-    text: str,
+    value: str,
     x: float,
     top: float,
     width: float,
@@ -45,23 +47,23 @@ def paragraph(
     bold: bool = False,
 ) -> float:
     style = ParagraphStyle(
-        "body",
+        "text",
         fontName="AppleGothic",
         fontSize=size,
         leading=leading or size * 1.55,
         textColor=color,
         wordWrap="CJK",
     )
-    item = Paragraph(f"<b>{text}</b>" if bold else text, style)
+    item = Paragraph(f"<b>{value}</b>" if bold else value, style)
     _, height = item.wrap(width, PAGE_H)
     item.drawOn(c, x, top - height)
     return height
 
 
-def label(c: canvas.Canvas, text: str, x: float, y: float, color=SECONDARY) -> None:
+def label(c: canvas.Canvas, value: str, x: float, y: float, color=SECONDARY, size: float = 9) -> None:
     c.setFillColor(color)
-    c.setFont("AppleGothic", 9)
-    c.drawString(x, y, text)
+    c.setFont("AppleGothic", size)
+    c.drawString(x, y, value)
 
 
 def rule(c: canvas.Canvas, x1: float, y: float, x2: float) -> None:
@@ -70,14 +72,22 @@ def rule(c: canvas.Canvas, x1: float, y: float, x2: float) -> None:
     c.line(x1, y, x2, y)
 
 
-def screenshot(c: canvas.Canvas, filename: str, x: float, y: float, width: float, height: float) -> None:
-    source = ImageReader(str(ASSETS / filename))
-    iw, ih = source.getSize()
+def screenshot(
+    c: canvas.Canvas,
+    filename: str,
+    x: float,
+    y: float,
+    width: float,
+    height: float,
+    crop: tuple[int, int, int, int] | None = None,
+) -> None:
+    with Image.open(ASSETS / filename) as source:
+        picture = source.crop(crop) if crop else source.copy()
+    iw, ih = picture.size
     scale = min(width / iw, height / ih)
     dw, dh = iw * scale, ih * scale
-    left = x + (width - dw) / 2
-    bottom = y + (height - dh) / 2
-    c.drawImage(source, left, bottom, dw, dh, mask="auto")
+    left, bottom = x + (width - dw) / 2, y + (height - dh) / 2
+    c.drawImage(ImageReader(picture), left, bottom, dw, dh, mask="auto")
     c.setStrokeColor(RULE)
     c.setLineWidth(0.6)
     c.rect(left, bottom, dw, dh, fill=0, stroke=1)
@@ -88,128 +98,216 @@ def footer(c: canvas.Canvas, page: int) -> None:
     label(c, "KnowWow  |  3반 정다운  |  LangChain 종합실습과제", 44, 27)
     c.setFillColor(SECONDARY)
     c.setFont("AppleGothic", 9)
-    c.drawRightString(PAGE_W - 44, 27, f"{page} / 4")
+    c.drawRightString(PAGE_W - 44, 27, f"{page} / {PAGE_COUNT}")
 
 
-def heading(c: canvas.Canvas, page: int, section: str, title: str) -> None:
+def heading(c: canvas.Canvas, page: int, section: str, title: str, title_size: float = 22) -> None:
     label(c, f"KnowWow  /  {section}", 44, 555, ACCENT)
-    paragraph(c, title, 44, 540, 753, size=22, leading=30)
+    paragraph(c, title, 44, 539, 753, size=title_size, leading=30)
     rule(c, 44, 493, PAGE_W - 44)
     footer(c, page)
 
 
 def draw_page_one(c: canvas.Canvas) -> None:
-    label(c, "KnowWow  /  구현 기록", 44, 555, ACCENT)
-    paragraph(c, "설치 누락인데, 왜 도면을 고쳤을까", 44, 536, 753, size=27, leading=35)
+    heading(c, 1, "기획 배경", "현장 기록에는 처리만 남고, 이유는 빠진다", 24)
     paragraph(
         c,
-        "CASE-008은 자재도 준비됐고 도면에도 문제가 없었지만, 도면 개정으로 처리됐습니다. "
-        "비슷한 설치 누락 8건 중 6건은 생산 부서로 넘겼습니다.",
-        44, 487, 753, size=11, leading=18,
+        "선박의 세면대 온수 배관이 설치되지 않았다는 업무 기록이 있습니다. "
+        "자재도 준비됐고 도면에도 문제가 없는데, 담당자는 도면을 고쳤습니다. "
+        "기록에는 이 결정을 내린 이유가 없습니다.",
+        44, 476, 753, size=11, leading=18,
     )
-    paragraph(
-        c,
-        "Comment에는 무엇을 했는지는 남지만, 왜 그 처리를 택했는지는 빠지기 쉽습니다. "
-        "KnowWow는 처리 차이를 찾은 뒤 담당자에게 그 이유를 묻습니다.",
-        44, 437, 753, size=10, leading=16,
-    )
-    rule(c, 44, 390, PAGE_W - 44)
 
-    screenshot(c, "case008-overview.png", 44, 147, 753, 224)
-    label(c, "실제 화면 · 대표 업무 CASE-008의 처리와 비슷한 과거 업무의 최다 처리", 44, 132)
+    label(c, "비슷한 과거 업무 8건 중 6건", 44, 403, ACCENT, 9.5)
+    paragraph(c, "생산 부서에 넘겨 설치 요청", 44, 392, 350, size=13, leading=20)
+    c.setStrokeColor(RULE)
+    c.line(420, 365, 420, 414)
+    label(c, "이번 업무 CASE-008", 445, 403, ACCENT, 9.5)
+    paragraph(c, "도면 개정", 445, 392, 352, size=13, leading=20)
 
-    rule(c, 44, 114, PAGE_W - 44)
+    screenshot(c, "case008-overview.png", 44, 160, 753, 183)
+    label(c, "실제 구현 화면 · 대표 업무와 비슷한 과거 업무의 처리 비교", 44, 144)
+    rule(c, 44, 126, PAGE_W - 44)
     paragraph(
         c,
-        "이번 과제에서는 예시 Comment와 과거 처리 기록을 사용했습니다. "
-        "사람이 답한 내용을 모델이 정리하더라도, 확인 전에는 지식으로 저장하지 않습니다.",
-        44, 103, 753, size=9.5, leading=16,
+        "KnowWow는 이런 차이가 보일 때 담당자에게 짧게 묻습니다. "
+        "답을 대신 지어내지 않고, 담당자가 설명한 추가 상황만 확인해 다음 업무에 참고할 수 있게 남기는 것이 목표입니다.",
+        44, 113, 753, size=10, leading=16,
     )
-    footer(c, 1)
     c.showPage()
 
 
 def draw_page_two(c: canvas.Canvas) -> None:
-    heading(c, 2, "질문 생성", "어떤 차이를 보고 질문했는가")
+    heading(c, 2, "데이터 준비", "무엇을 비교하려고 기록을 나눴나")
     paragraph(
         c,
-        "문제 유형·장비·시스템·자재 상태·도면 상태가 같은 기록을 묶었습니다. "
-        "8건의 처리 분포는 생산 이관 6건, 현장 확인 후 이관 1건, 도면 개정 1건입니다.",
-        44, 479, 753, size=10, leading=16,
+        "실제 회사 정보 대신 직접 만든 예시 업무 기록 24건을 사용했습니다. "
+        "Comment는 접수된 문제, Response는 당시 남긴 처리 내용입니다. 아래 값은 대표 업무 CASE-008의 예입니다.",
+        44, 478, 753, size=10, leading=16,
     )
 
-    screenshot(c, "case008-pattern.png", 44, 182, 317, 267)
-    screenshot(c, "case008-question.png", 379, 182, 418, 267)
-    label(c, "1  실제 Comment와 과거 처리 분포", 44, 165)
-    label(c, "2  LangChain으로 생성한 질문", 379, 165)
-    rule(c, 44, 148, PAGE_W - 44)
+    columns = (44, 225, 476, 797)
+    rule(c, columns[0], 430, columns[3])
+    label(c, "기록 항목", columns[0], 414, ACCENT)
+    label(c, "CASE-008에 적힌 내용", columns[1], 414, ACCENT)
+    label(c, "서비스에서 쓰는 이유", columns[2], 414, ACCENT)
+    rule(c, columns[0], 401, columns[3])
+
+    rows = [
+        ("접수된 문제", "세면대 온수 배관 미설치", "무슨 일이 있었는지 읽는 원문"),
+        ("기록된 처리", "설치 전에 도면을 고침", "실제로 어떤 조치를 했는지"),
+        ("문제 유형", "설치 누락", "비슷한 업무를 찾는 조건 1"),
+        ("장비 / 배관 계통", "세면대 / 온수 배관", "비슷한 업무를 찾는 조건 2, 3"),
+        ("자재 / 도면 상태", "준비됨 / 문제 없음", "비슷한 업무를 찾는 조건 4, 5"),
+        ("업무 결과", "승인", "처리 후 상태. 정답 판정에는 쓰지 않음"),
+        ("담당자 / 프로젝트", "EMP-001 / SHIP-C01", "누가, 어느 업무에서 남겼는지 추적"),
+    ]
+    for index, (field, example, purpose) in enumerate(rows):
+        top = 395 - index * 39
+        paragraph(c, field, columns[0], top, 170, size=9.5, leading=14)
+        paragraph(c, example, columns[1], top, 240, size=9.5, leading=14)
+        paragraph(c, purpose, columns[2], top, 320, size=9.3, leading=14)
+        rule(c, columns[0], top - 33, columns[3])
 
     paragraph(
         c,
-        "코드로는 처리 방식이 달랐다는 사실까지만 알 수 있습니다. 왜 달랐는지는 기록에 없어, "
-        "LLM에 현재 조건과 과거 처리 분포를 주고 담당자에게 물을 문장을 만들게 했습니다.",
-        44, 137, 356, size=9.5, leading=15,
-    )
-    paragraph(
-        c,
-        "ChatPromptTemplate에 역할·금지 조건·출력 형식을 넣고 "
-        "ChatModel, StrOutputParser로 이었습니다. 모델이 이유를 짐작해 답하지 않도록 질문 한 문장만 출력하게 했습니다.",
-        419, 137, 378, size=9.5, leading=15,
+        "비교할 때는 문제 유형·장비·배관 계통·자재 상태·도면 상태, 이 다섯 가지만 묶습니다. "
+        "현재 처리와 업무 결과는 비교 대상의 특징을 설명하지만, 같은 업무를 찾는 조건에는 넣지 않았습니다.",
+        44, 105, 753, size=9.5, leading=15,
     )
     c.showPage()
 
 
 def draw_page_three(c: canvas.Canvas) -> None:
-    heading(c, 3, "답변 정리", "답변을 확인한 뒤 저장한다")
-    screenshot(c, "case008-structured.png", 44, 113, 354, 365)
-    label(c, "웹 화면 · 답변 정리 후, 아직 저장하지 않은 상태", 44, 96)
+    heading(c, 3, "과거 기록 비교", "같은 조건 8건인데, 이번 처리가 다르다")
+    paragraph(
+        c,
+        "CASE-008과 다섯 조건이 같은 업무를 모았습니다. 가장 많이 한 처리는 생산 부서로 넘기는 방식입니다.",
+        44, 478, 753, size=10, leading=16,
+    )
+    screenshot(c, "case008-pattern.png", 44, 77, 353, 379)
+    label(c, "실제 화면 · 접수된 내용과 과거 처리 8건의 분포", 44, 61)
 
-    screenshot(c, "notebook-main.png", 420, 275, 377, 203)
-    label(c, "제출 노트북에 저장된 실제 모델 실행 결과", 420, 259)
-    rule(c, 420, 243, 797)
+    label(c, "기록에 있는 사실", 429, 443, ACCENT, 10)
+    paragraph(c, "6건은 생산 부서에 넘김", 429, 424, 368, size=15, leading=21)
+    paragraph(c, "1건은 현장 확인 후 넘김, 1건은 도면 개정", 429, 394, 368, size=9.7, leading=15)
+    rule(c, 429, 361, 797)
+
+    label(c, "이번 업무", 429, 342, ACCENT, 10)
     paragraph(
         c,
-        "질문은 수정된 프롬프트와 실제 API 모델로 생성했습니다. 담당자의 테스트 답변은 "
-        "Pydantic Structured Output으로 새 조건·판단 이유·예외를 나눠 받았습니다.",
-        420, 230, 377, size=9.5, leading=15,
+        "문제 유형과 자재·도면 상태는 비슷하지만, CASE-008에서는 도면을 고쳤습니다. "
+        "기록만으로는 설치 위치에 다른 장비가 있었다는 사실을 알 수 없습니다.",
+        429, 328, 368, size=10.3, leading=17,
+    )
+    rule(c, 429, 245, 797)
+
+    label(c, "그래서 질문합니다", 429, 226, ACCENT, 10)
+    paragraph(
+        c,
+        "여섯 건이 따랐던 방식을 정답으로 취급하지는 않습니다. "
+        "과거와 다른 처리의 이유가 기록되지 않았으므로, 담당자에게 이번에 달랐던 상황을 확인합니다.",
+        429, 212, 368, size=10.3, leading=17,
     )
     paragraph(
         c,
-        "화면에서 답변을 확인하거나 고치고 저장할 수 있습니다. 확인 버튼을 누르기 전에는 "
-        "개인 지식으로 확정하지 않습니다.",
-        420, 169, 377, size=9.5, leading=15,
-    )
-    paragraph(
-        c,
-        "다른 질문에는 Document·Embeddings·Vector Store·Tool-calling Agent를 사용해 "
-        "근거를 찾고 출처를 확인합니다.",
-        420, 119, 377, size=9, leading=14, color=SECONDARY,
+        "처리 건수 계산과 질문 필요 여부는 코드가 판단합니다. LLM은 아직 없는 이유를 추측하지 않고 질문 문장만 만듭니다.",
+        429, 122, 368, size=9.1, leading=14, color=SECONDARY,
     )
     c.showPage()
 
 
 def draw_page_four(c: canvas.Canvas) -> None:
-    heading(c, 4, "비교 실행", "세 가지 입력에서 나온 결과")
-    screenshot(c, "notebook-compare.png", 44, 176, 753, 299)
-    label(c, "제출 노트북에 저장된 CASE-018 / CASE-024 질문·답변 정리 결과", 44, 160)
-    rule(c, 44, 148, PAGE_W - 44)
-
-    rows = [
-        ("CASE-008", "설치 위치의 장비 간섭을 새 조건으로 정리"),
-        ("CASE-018", "대체 자재 확보는 찾았지만 표준 이름·값과 불일치"),
-        ("CASE-024", "합의 메일은 근거에 반영, 새 조건 필드는 빈칸"),
-    ]
-    for index, (case_id, result) in enumerate(rows):
-        y = 133 - index * 22
-        label(c, case_id, 44, y, ACCENT)
-        label(c, result, 133, y, INK)
-
-    rule(c, 44, 75, PAGE_W - 44)
+    heading(c, 4, "질문 기능", "평소와 같으면 묻지 않고, 다를 때만 묻는다")
     paragraph(
         c,
-        "예시 24건과 경험적 임계값을 썼습니다. 모호한 답변에서는 조건이 빠질 수 있어 "
-        "사람의 확인이 필요합니다. 평가 데이터셋과 영속 저장소는 아직 없고, 온톨로지는 이번 MVP에서 제외했습니다.",
-        44, 66, 753, size=8.5, leading=13, color=SECONDARY,
+        "같은 데이터를 써도 이번에 택한 처리 방식에 따라 화면이 달라집니다. 질문을 남발하지 않기 위한 선택입니다.",
+        44, 478, 753, size=10, leading=16,
+    )
+    label(c, "CASE-004 · 과거에 가장 많았던 방식", 44, 441, ACCENT, 10)
+    label(c, "CASE-008 · 과거와 다른 방식", 429, 441, ACCENT, 10)
+    screenshot(c, "case004-no-question.png", 44, 247, 352, 171)
+    screenshot(c, "case008-question.png", 429, 163, 368, 255)
+    label(c, "실제 화면 · 추가 질문 없음", 44, 230)
+    label(c, "실제 화면 · LangChain이 만든 한 문장 질문", 429, 146)
+
+    paragraph(
+        c,
+        "CASE-004는 생산 부서에 넘겼습니다. 같은 조건의 업무에서 가장 많았던 처리라 "
+        "추가로 묻지 않습니다. 이 업무의 결과가 '반려'인 것과 질문 여부는 별개입니다.",
+        44, 214, 352, size=9.8, leading=16,
+    )
+    paragraph(
+        c,
+        "CASE-008은 도면 개정이었습니다. LLM에는 현재 기록과 과거 처리별 건수, "
+        "'답을 추측하지 말고 한 문장으로 물을 것'이라는 조건을 넣었습니다.",
+        429, 132, 368, size=9.8, leading=16,
+    )
+    c.showPage()
+
+
+def draw_page_five(c: canvas.Canvas) -> None:
+    heading(c, 5, "답변 정리", "이유는 담당자가 말하고, AI는 정리만 한다")
+    paragraph(
+        c,
+        "담당자는 '실제 설치 위치에 다른 장비가 있어서 그대로 설치할 수 없었습니다'라고 답했습니다. "
+        "그제야 기록에 없던 조건이 드러납니다.",
+        44, 478, 753, size=10, leading=16,
+    )
+
+    screenshot(c, "case008-structured.png", 69, 111, 703, 339, crop=(0, 550, 718, 900))
+    label(c, "실제 화면을 확대해 잘라낸 부분 · AI가 정리한 내용과 저장 전 확인 버튼", 69, 96)
+    paragraph(
+        c,
+        "AI는 '설치 위치에 다른 장비가 있어 기존 도면대로 설치할 수 없었다'는 판단 이유를 정리했습니다. "
+        "화면의 '아직 저장되지 않음'처럼, 담당자가 고치거나 확인하기 전에는 지식으로 확정하지 않습니다.",
+        44, 83, 753, size=9.3, leading=14,
+    )
+    c.showPage()
+
+
+def draw_page_six(c: canvas.Canvas) -> None:
+    heading(c, 6, "LangChain 구현", "모델은 질문을 만들고 답변을 나눠 적는다", 21)
+    paragraph(
+        c,
+        "업무 기록과 처리 분포를 ChatPromptTemplate → ChatModel → StrOutputParser로 연결해 질문을 만들었습니다. "
+        "담당자 답변은 Pydantic Structured Output으로 새 상황과 판단 이유를 나눴습니다.",
+        44, 478, 753, size=9.8, leading=15,
+    )
+    screenshot(c, "notebook-main.png", 44, 194, 753, 244, crop=(0, 190, 1200, 630))
+    label(c, "제출 노트북의 저장된 실제 모델 실행 결과 · CASE-008 질문과 답변 정리", 44, 178)
+    rule(c, 44, 162, PAGE_W - 44)
+    label(c, "질문 만들기", 44, 143, ACCENT)
+    paragraph(c, "프롬프트에 역할과 금지 조건을 넣고, 모델 답변에서 질문 문장만 꺼냅니다.", 44, 130, 230, size=8.8, leading=14)
+    label(c, "답변 정리", 300, 143, ACCENT)
+    paragraph(c, "담당자가 말한 새 상황과 판단 이유를 정해진 항목으로 받습니다.", 300, 130, 230, size=8.8, leading=14)
+    label(c, "다시 찾기", 556, 143, ACCENT)
+    paragraph(
+        c,
+        "확인된 지식과 과거 기록은 검색 Agent의 근거로 사용합니다. 이번 과제의 중심 기능은 질문과 답변 정리입니다.",
+        556, 130, 241, size=8.8, leading=14,
+    )
+    c.showPage()
+
+
+def draw_page_seven(c: canvas.Canvas) -> None:
+    heading(c, 7, "비교 실행", "다른 답변에서는 어디까지 알아냈나")
+    paragraph(
+        c,
+        "같은 질문 생성·답변 정리 과정을 다른 업무에도 실행했습니다. 실제 모델 출력은 아래처럼 성공한 부분과 놓친 부분이 함께 남아 있습니다.",
+        44, 478, 753, size=9.8, leading=15,
+    )
+    screenshot(c, "notebook-compare.png", 44, 158, 753, 300)
+    label(c, "제출 노트북의 저장된 실제 실행 결과 · CASE-018과 CASE-024", 44, 142)
+    rule(c, 44, 127, PAGE_W - 44)
+    label(c, "CASE-018", 44, 112, ACCENT)
+    paragraph(c, "대체 자재 확보는 찾아냈지만, 미리 정한 항목 이름·값과 맞지 않았습니다.", 138, 121, 659, size=8.9, leading=13)
+    label(c, "CASE-024", 44, 90, ACCENT)
+    paragraph(c, "합의 메일 내용은 판단 근거에 반영했지만, 새 상황 항목은 비웠습니다.", 138, 99, 659, size=8.9, leading=13)
+    paragraph(
+        c,
+        "예시 데이터 24건과 경험적 기준을 쓴 MVP입니다. 모호한 답변은 사람이 확인해야 하며, 온톨로지는 이번에 만들지 않았습니다.",
+        44, 72, 753, size=8.3, leading=12, color=SECONDARY,
     )
     c.showPage()
 
@@ -218,9 +316,17 @@ def main() -> None:
     setup_fonts()
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     c = canvas.Canvas(str(OUTPUT), pagesize=(PAGE_W, PAGE_H))
-    c.setTitle("KnowWow 구현 기록")
+    c.setTitle("KnowWow 구현 설명")
     c.setAuthor("정다운")
-    for page in (draw_page_one, draw_page_two, draw_page_three, draw_page_four):
+    for page in (
+        draw_page_one,
+        draw_page_two,
+        draw_page_three,
+        draw_page_four,
+        draw_page_five,
+        draw_page_six,
+        draw_page_seven,
+    ):
         page(c)
     c.save()
     print(OUTPUT)
