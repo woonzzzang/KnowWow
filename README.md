@@ -12,7 +12,6 @@
 - [x] 사용자 확인 후 Personal Knowledge 저장
 - [x] Docker Compose 통합 실행
 - [x] 실행 결과가 저장된 제출용 Jupyter Notebook
-- [ ] 루트 `.env`의 `OPENAI_API_KEY` 입력 — 사용자가 직접 입력
 
 온톨로지와 지식 그래프는 하루 MVP 범위에서 제외했습니다. 대신 설명 가능하고 검증 가능한 JSON 데이터, Pattern Signature, Evidence ID를 사용합니다.
 
