@@ -1,4 +1,4 @@
-# KnowFlow
+# KnowWow
 
 > **Work as usual, knowledge grows.**
 > 제조 업무 Comment 이력에서 반복 패턴을 찾고, 패턴과 다른 처리가 발생했을 때만 담당자에게 짧게 질문하여 판단 근거를 지식으로 축적하는 LangChain 기반 AI 도우미입니다.
@@ -17,7 +17,7 @@
 
 ## 핵심 아이디어
 
-기존 업무 기록에는 `무엇을 처리했는가`는 남지만 `왜 그렇게 판단했는가`는 잘 남지 않습니다. KnowFlow는 모든 업무에 질문하지 않고 다음 흐름으로 새 조건만 수집합니다.
+기존 업무 기록에는 `무엇을 처리했는가`는 남지만 `왜 그렇게 판단했는가`는 잘 남지 않습니다. KnowWow는 모든 업무에 질문하지 않고 다음 흐름으로 새 조건만 수집합니다.
 
 ```text
 Comment Case
@@ -54,21 +54,21 @@ LLM은 패턴 집계나 `ACTION_VARIANT` 판정을 하지 않습니다. 결정�
 ├── backend/                        # 결정론적 업무 규칙과 REST API
 ├── ai-service/                     # LangChain + FastAPI
 ├── data/                           # Synthetic JSON 데이터
-├── notebooks/
-│   └── KnowFlow_LangChain_MVP.ipynb
+├── 3반_정다운_KnowWow.ipynb          # 실제 LLM 실행 결과를 저장한 제출 노트북
 ├── scripts/
 │   ├── validate_seed.py            # 데이터 불변조건 검증
 │   ├── smoke_test.py               # 실행 중 서비스 통합 검증
-│   └── build_notebook.py           # 제출 노트북 재생성
+│   └── run_notebook.py             # 기존 노트북 셀을 재실행하고 결과 저장
 ├── docker-compose.yml
-└── KnowFlow_MVP_SPEC_v2.md         # 상세 제품 명세
+├── KnowWow_MVP_SPEC_v2.md          # 상세 제품 명세
+└── output/pdf/KnowWow_구현_설명.pdf # 핵심 화면·실행 결과 설명
 ```
 
 ## 가장 빠른 실행 방법
 
 ### 1. API 키 입력
 
-루트에 `.env`가 생성되어 있으며 키 값은 의도적으로 비워 두었습니다.
+루트의 `.env`에 본인 API 키를 설정합니다. 이 파일은 Git에서 제외되며 제출물에도 포함하지 않습니다.
 
 ```env
 OPENAI_API_KEY=
@@ -77,7 +77,7 @@ MODEL_NAME=gpt-4o-mini
 OPENAI_EMBEDDING_MODEL=text-embedding-3-small
 ```
 
-`OPENAI_API_KEY=` 오른쪽에 키를 입력합니다. `.env`는 Git에서 제외됩니다.
+키를 교체할 때는 `OPENAI_API_KEY=` 오른쪽 값만 수정합니다.
 
 ### 2. 전체 서비스 실행
 
@@ -89,7 +89,7 @@ docker compose up --build
 
 | 주소 | 용도 |
 |---|---|
-| http://localhost:3000 | KnowFlow 웹 화면 |
+| http://localhost:3000 | KnowWow 웹 화면 |
 | http://localhost:8080/actuator/health | Backend 상태 |
 | http://localhost:8000/health | AI Service와 키 설정 상태 |
 | http://localhost:8000/docs | FastAPI 명세 |
@@ -244,12 +244,15 @@ python3 scripts/smoke_test.py
 
 ## 제출용 노트북
 
-[`notebooks/KnowFlow_LangChain_MVP.ipynb`](./notebooks/KnowFlow_LangChain_MVP.ipynb)에 설명과 Demo Mode 실행 결과가 저장되어 있습니다. 제출 전 다음 작업을 권장합니다.
+제출 파일은 루트의 [`3반_정다운_KnowWow.ipynb`](./3반_정다운_KnowWow.ipynb)입니다. 실제 API 키로 질문 생성·답변 구조화·임베딩 셀을 끝까지 실행했고, `CASE-008` 외에 `CASE-018`, `CASE-024`도 같은 체인으로 비교한 결과가 저장돼 있습니다. 이전의 Fake 모델 출력은 제거했습니다. 코드 셀을 다시 실행해 저장하려면 프로젝트 루트에서 다음 명령을 사용합니다.
 
-1. `.env`에 실제 API 키를 입력합니다.
-2. 노트북을 처음부터 끝까지 `Restart & Run All` 합니다.
-3. 실제 LLM 결과가 저장됐는지 확인합니다.
-4. 학교 안내에 맞춰 `{반}_{이름}_KnowFlow.ipynb`로 파일명을 변경합니다.
+```bash
+ai-service/.venv/bin/python scripts/run_notebook.py
+```
+
+실행 결과에서는 `CASE-018`의 대체 자재 확보를 의미상 포착했으나 표준 이름·값과 다르게 표현했고, `CASE-024`의 합의 메일 확인은 근거 문장에는 반영했지만 새 조건 필드는 비웠습니다. 이는 실제 모델의 구조화 한계로 노트북에 그대로 남겼습니다. 핵심 화면과 실행 결과를 짧게 설명한 PDF는 [`output/pdf/KnowWow_구현_설명.pdf`](./output/pdf/KnowWow_구현_설명.pdf)입니다.
+
+PDF를 다시 만들 때는 실행 중인 서비스와 macOS Chrome이 필요합니다. `node scripts/capture_pdf_assets.mjs`로 화면 일부와 노트북 출력을 캡처한 뒤, `ai-service/.venv/bin/python scripts/build_explanation_pdf.py`를 실행합니다. 웹 화면과 제출 노트북은 각각 실제 모델을 호출하므로 질문 문구는 조금 다를 수 있습니다.
 
 ## 현재 한계와 다음 단계
 
@@ -260,4 +263,4 @@ python3 scripts/smoke_test.py
 - 다음 단계는 운영 DB, 영속 Vector DB, 평가 데이터셋, 승인 워크플로, LangSmith trace입니다.
 - 충분히 검증된 Context가 쌓인 이후에만 온톨로지 후보와 관계 정의를 도입하는 편이 안전합니다.
 
-상세 데이터 계약과 설계 의도는 [`KnowFlow_MVP_SPEC_v2.md`](./KnowFlow_MVP_SPEC_v2.md)를 참고하세요.
+상세 데이터 계약과 설계 의도는 [`KnowWow_MVP_SPEC_v2.md`](./KnowWow_MVP_SPEC_v2.md)를 참고하세요.

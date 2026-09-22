@@ -46,9 +46,13 @@ OUTCOME_LABELS = {
 
 KNOWLEDGE_TERM_LABELS = {
     "installation_feasibility": "현장 설치 가능 여부",
+    "installation_location_issue": "설치 위치의 장비 간섭",
     "substitute_material_availability": "대체 자재 확보 여부",
+    "alternative_material_available": "대체 자재 확보 여부",
     "owner_approved_change": "선주 변경 승인 여부",
     "IMPOSSIBLE": "설치 불가능",
+    "EQUIPMENT_CONFLICT": "다른 장비와 간섭",
+    "YES": "확보됨",
     "CONFIRMED": "확인됨",
 }
 

@@ -54,7 +54,12 @@ KNOWLEDGE_EXTRACTION_PROMPT = ChatPromptTemplate.from_messages(
 불명확한 필드는 null로 반환하십시오. new_context.name은 짧은 영문 snake_case로,
 value는 짧은 대문자 controlled value로 표현하십시오. rationale은 답변의 의미를
 바꾸지 않는 범위에서만 한국어로 간결하게 정리하십시오. exception도 언급된 경우
-한국어로 작성하십시오.""",
+한국어로 작성하십시오.
+
+new_context는 답변으로 새로 확인된 현장 조건만 담습니다. 이번 처리 방식이나 과거에
+많았던 처리 방식의 이름을 name/value로 넣지 마십시오. 단순히 두 처리 방식이
+다르다고 되풀이하지 말고, 답변에 실제로 적힌 자재·설치·승인 등 판단 조건을
+추출하십시오. 답변에 그런 조건이 없다면 new_context는 null입니다.""",
         ),
         (
             "human",

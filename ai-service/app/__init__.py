@@ -1,2 +1,1 @@
-"""KnowFlow LangChain AI service."""
-
+"""KnowWow LangChain AI service."""

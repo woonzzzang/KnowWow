@@ -13,3 +13,4 @@
 **/.venv/
 *.tsbuildinfo
 *.pyc
+tmp/pdfs/

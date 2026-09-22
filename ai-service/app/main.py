@@ -15,7 +15,7 @@ settings = get_settings()
 service = KnowledgeService(settings)
 
 app = FastAPI(
-    title="KnowFlow AI Service",
+    title="KnowWow AI Service",
     version="0.1.0",
     description="LangChain micro-interview, structured output, retrieval and tool-calling agent",
 )

@@ -25,11 +25,11 @@ export function AppShell({children}: {children: React.ReactNode}) {
         <button className="mr-3 rounded-lg p-2 text-muted hover:bg-slate-100 lg:hidden" onClick={() => setMobileOpen(true)} aria-label="메뉴 열기">
           <Menu className="size-5" />
         </button>
-        <Link href="/" className="flex items-center gap-3" aria-label="KnowFlow 홈">
+        <Link href="/" className="flex items-center gap-3" aria-label="KnowWow 홈">
           <span className="flex size-9 items-center justify-center rounded-xl bg-primary-600 text-white shadow-sm">
             <PanelLeftClose className="size-5" />
           </span>
-          <span className="text-xl font-extrabold tracking-tight text-primary-700">KnowFlow</span>
+          <span className="text-xl font-extrabold tracking-tight text-primary-700">KnowWow</span>
           <span className="hidden text-sm text-muted md:inline">현장의 경험이, 모두의 지식이 되는 제조 지식 플랫폼</span>
         </Link>
         <div className="ml-auto flex items-center gap-3 rounded-xl border border-line bg-white px-3 py-2">
@@ -74,4 +74,3 @@ export function AppShell({children}: {children: React.ReactNode}) {
     </div>
   );
 }
-
