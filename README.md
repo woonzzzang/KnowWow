@@ -123,7 +123,7 @@ Docker 대신 각 서비스를 개발 모드로 실행하려면 아래의 "로�
 실제 설치 위치에 다른 장비가 있어서 그대로 설치할 수 없었습니다.
 ```
 
-7. Structured Output 미리보기에서 `installation_feasibility=IMPOSSIBLE`과 근거를 확인합니다.
+7. Structured Output 미리보기에서 AI가 추출한 설치 방해 조건과 근거를 확인합니다. 저장된 노트북 실행에서는 `installation_location_issue=EQUIPMENT_CONFLICT`가 나왔으며, 평가용 기대 조건명·값과는 달랐습니다.
 8. 사용자가 **확인하고 지식으로 저장**을 눌러야 `Personal Knowledge`가 됩니다.
 
 `CASE-004`는 비슷한 업무에서 가장 많이 관찰된 방식으로 처리된 비교 사례입니다. 이 화면에서는 AI 질문·답변 입력을 표시하지 않고, 대표 사례인 `CASE-008`로 이동할 수 있게 안내합니다. AI 질문은 현재 사례의 Comment/Response 원문과 코드로 집계한 과거 처리 건수를 함께 입력받아 생성하며, 생성 실패 시 고정 예시 질문으로 대체하지 않습니다.
