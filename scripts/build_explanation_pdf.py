@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 ASSETS = ROOT / "tmp" / "pdfs"
 OUTPUT = ROOT / "output" / "pdf" / "KnowWow_구현_설명.pdf"
 PAGE_W, PAGE_H = landscape(A4)
-PAGE_COUNT = 7
+PAGE_COUNT = 8
 
 INK = colors.HexColor("#222932")
 SECONDARY = colors.HexColor("#596575")
@@ -312,6 +312,61 @@ def draw_page_seven(c: canvas.Canvas) -> None:
     c.showPage()
 
 
+def draw_page_eight(c: canvas.Canvas) -> None:
+    heading(c, 8, "다음 단계", "개인의 경험이 팀의 참고 지식이 되려면", 22)
+    paragraph(
+        c,
+        "여기서 말하는 암묵지는 기록에 빠져 있던 현장 판단 조건입니다. CASE-008의 '설치 위치에 다른 장비가 있었다'는 "
+        "설명처럼, 담당자가 말해야 비로소 알 수 있는 내용입니다.",
+        44, 478, 753, size=10.3, leading=17,
+    )
+    paragraph(
+        c,
+        "목표는 이런 설명을 한 사람의 기억에만 두지 않고, 출처와 확인 과정을 남겨 다음 담당자도 찾아볼 수 있게 하는 것입니다.",
+        44, 431, 753, size=9.5, leading=15,
+    )
+    rule(c, 44, 398, PAGE_W - 44)
+
+    label(c, "지금 구현된 것", 44, 380, ACCENT, 10)
+    paragraph(c, "1  담당자가 확인한 개인 지식", 44, 365, 350, size=12, leading=18)
+    paragraph(
+        c,
+        "답변 원문과 CASE-008 출처를 함께 저장합니다. AI가 정리한 내용은 담당자가 확인해야 지식으로 남습니다.",
+        44, 340, 350, size=9.8, leading=16,
+    )
+    paragraph(c, "2  반복되는 새 상황의 후보", 430, 365, 367, size=12, leading=18)
+    paragraph(
+        c,
+        "확인된 지식에서 같은 새 상황이 몇 번 언급됐고 누가 설명했는지 집계합니다. 아직은 검토 후보일 뿐입니다.",
+        430, 340, 367, size=9.8, leading=16,
+    )
+    rule(c, 44, 277, PAGE_W - 44)
+
+    label(c, "앞으로 필요한 것 · 이번 MVP에는 미구현", 44, 259, ACCENT, 10)
+    paragraph(c, "3  팀의 검토와 승인", 44, 244, 350, size=12, leading=18)
+    paragraph(
+        c,
+        "다른 담당자·프로젝트에서도 같은 조건이 반복되는지, 반대 사례는 없는지 확인해야 합니다. 공유 여부는 사람이 결정합니다.",
+        44, 219, 350, size=9.8, leading=16,
+    )
+    paragraph(c, "4  팀이 참고하는 처리 패턴", 430, 244, 367, size=12, leading=18)
+    paragraph(
+        c,
+        "검토된 조건을 출처와 함께 공유하면 비슷한 업무에서 과거 판단을 찾기 쉬워집니다. 가장 많았던 처리를 정답으로 만드는 것은 아닙니다.",
+        430, 219, 367, size=9.8, leading=16,
+    )
+    rule(c, 44, 153, PAGE_W - 44)
+
+    label(c, "현재 화면과 혼동하지 말아야 할 점", 44, 135, ACCENT, 10)
+    paragraph(
+        c,
+        "현재 Team Knowledge 화면은 예시 업무 기록에서 처리 횟수를 집계한 결과입니다. 저장된 개인 지식이 그 화면의 팀 패턴으로 "
+        "자동 승격되지는 않습니다. 위의 검토·승인 과정을 거쳐 연결하는 것이 향후 확장 방향입니다.",
+        44, 121, 753, size=9.4, leading=15,
+    )
+    c.showPage()
+
+
 def main() -> None:
     setup_fonts()
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
@@ -326,6 +381,7 @@ def main() -> None:
         draw_page_five,
         draw_page_six,
         draw_page_seven,
+        draw_page_eight,
     ):
         page(c)
     c.save()

@@ -252,7 +252,7 @@ ai-service/.venv/bin/python scripts/run_notebook.py
 
 실행 결과에서는 `CASE-018`의 대체 자재 확보를 의미상 포착했으나 표준 이름·값과 다르게 표현했고, `CASE-024`의 합의 메일 확인은 근거 문장에는 반영했지만 새 조건 필드는 비웠습니다. 이는 실제 모델의 구조화 한계로 노트북에 그대로 남겼습니다. 기획 배경부터 핵심 화면과 실행 결과까지 설명한 PDF는 [`output/pdf/KnowWow_구현_설명.pdf`](./output/pdf/KnowWow_구현_설명.pdf)입니다.
 
-PDF는 기획 배경, 예시 데이터의 비교 항목, 질문·답변 기능과 실제 실행 결과를 화면 일부를 확대해 설명합니다. 다시 만들 때는 실행 중인 서비스와 macOS Chrome이 필요합니다. 먼저 `ai-service/.venv/bin/pip install reportlab pillow`로 PDF 제작 패키지를 설치하고, `node scripts/capture_pdf_assets.mjs`로 화면 일부와 노트북 출력을 캡처한 뒤 `ai-service/.venv/bin/python scripts/build_explanation_pdf.py`를 실행합니다. 웹 화면과 제출 노트북은 각각 실제 모델을 호출하므로 질문 문구는 조금 다를 수 있습니다.
+PDF는 기획 배경, 예시 데이터의 비교 항목, 질문·답변 기능과 실제 실행 결과를 화면 일부를 확대해 설명하고, 마지막에 개인 경험을 팀의 참고 지식으로 발전시키는 향후 방향을 구분해 적었습니다. 다시 만들 때는 실행 중인 서비스와 macOS Chrome이 필요합니다. 먼저 `ai-service/.venv/bin/pip install reportlab pillow`로 PDF 제작 패키지를 설치하고, `node scripts/capture_pdf_assets.mjs`로 화면 일부와 노트북 출력을 캡처한 뒤 `ai-service/.venv/bin/python scripts/build_explanation_pdf.py`를 실행합니다. 웹 화면과 제출 노트북은 각각 실제 모델을 호출하므로 질문 문구는 조금 다를 수 있습니다.
 
 ## 현재 한계와 다음 단계
 
@@ -260,6 +260,7 @@ PDF는 기획 배경, 예시 데이터의 비교 항목, 질문·답변 기능�
 - JSON 파일 저장은 동시 사용자와 대규모 데이터에 적합하지 않습니다.
 - In-memory Vector Store는 서비스 재시작 시 다시 구성됩니다.
 - 모호한 사용자 답변은 구조화 값이 `null`이 될 수 있습니다.
+- 개인이 확인한 새 판단 조건은 검토 후보로 집계하지만, 현재 Team Knowledge 화면의 팀 패턴으로 자동 승격하지 않습니다. 여러 담당자·업무의 근거와 반례를 검토하고 사람이 승인해 공유하는 단계는 향후 과제입니다.
 - 다음 단계는 운영 DB, 영속 Vector DB, 평가 데이터셋, 승인 워크플로, LangSmith trace입니다.
 - 충분히 검증된 Context가 쌓인 이후에만 온톨로지 후보와 관계 정의를 도입하는 편이 안전합니다.
 
