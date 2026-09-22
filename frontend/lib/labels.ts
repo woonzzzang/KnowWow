@@ -30,6 +30,17 @@ export const OUTCOME_LABELS: Record<string, string> = {
   PENDING: "대기",
 };
 
+export const MATERIAL_STATUS_LABELS: Record<string, string> = {
+  AVAILABLE: "자재 준비됨",
+  UNAVAILABLE: "자재 미확보",
+};
+
+export const DRAWING_STATUS_LABELS: Record<string, string> = {
+  VALID: "도면상 문제 없음",
+  INVALID: "도면 오류",
+  OUTDATED: "도면 갱신 필요",
+};
+
 export const KNOWLEDGE_CONTEXT_LABELS: Record<string, string> = {
   installation_feasibility: "현장 설치 가능 여부",
   substitute_material_availability: "대체 자재 확보 여부",

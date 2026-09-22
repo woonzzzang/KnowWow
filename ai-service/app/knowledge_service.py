@@ -54,6 +54,8 @@ def micro_question_context(request: MicroQuestionRequest) -> tuple[dict[str, Any
 
     current_case = {
         "문제": label_of(ISSUE_LABELS, request.current_case.issue_type, "분류되지 않은 문제"),
+        "접수된 원문 기록": request.current_case.comment_text,
+        "실제로 기록된 처리": request.current_case.response_text,
         "이번에 한 처리": label_of(
             ACTION_LABELS, request.current_case.action, "별도로 정한 방식으로 처리"
         ),

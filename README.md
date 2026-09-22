@@ -119,6 +119,8 @@ API 키가 비어 있어도 Dashboard, Pattern, Gap 기능은 동작합니다. L
 7. Structured Output 미리보기에서 `installation_feasibility=IMPOSSIBLE`과 근거를 확인합니다.
 8. 사용자가 **확인하고 지식으로 저장**을 눌러야 `Personal Knowledge`가 됩니다.
 
+`CASE-004`는 비슷한 업무에서 가장 많이 관찰된 방식으로 처리된 비교 사례입니다. 이 화면에서는 AI 질문·답변 입력을 표시하지 않고, 대표 사례인 `CASE-008`로 이동할 수 있게 안내합니다. AI 질문은 현재 사례의 Comment/Response 원문과 코드로 집계한 과거 처리 건수를 함께 입력받아 생성하며, 생성 실패 시 고정 예시 질문으로 대체하지 않습니다.
+
 추가 비교용 Case는 `CASE-018`, `CASE-024`이며 [`data/demo_scenarios.json`](./data/demo_scenarios.json)에 기대 Context가 정리되어 있습니다.
 
 ## LangChain 사용 지점
@@ -170,7 +172,7 @@ npm install
 npm run dev
 ```
 
-Backend가 실행되지 않으면 Frontend의 조회 화면은 내장 Demo Data를 표시합니다. 질문 생성·구조화·저장·Agent 요청은 실제 API 연결이 필요합니다.
+업무 기록은 Backend가 읽는 Synthetic JSON 데이터입니다. Frontend는 API 연결이 끊기면 내장 예시 결과를 실제 결과처럼 보여주지 않고 오류를 표시합니다. 질문 생성·답변 구조화·저장에는 실제 AI API 연결이 필요합니다.
 
 ## 테스트와 검증
 

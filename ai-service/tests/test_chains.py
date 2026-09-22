@@ -51,11 +51,33 @@ def test_micro_question_prompt_context_contains_only_plain_korean_terms():
     prompt_context = compact_json({"current_case": current_case, "matched_pattern": matched_pattern})
 
     assert "설치 누락" in prompt_context
+    assert "Pipe missing" in prompt_context
+    assert "Drawing revised" in prompt_context
     assert "도면 개정" in prompt_context
     assert "생산 부서로 넘겨 처리" in prompt_context
     assert "DRAWING_REVISION" not in prompt_context
     assert "INSTALLATION_MISSING" not in prompt_context
     assert "TRANSFER_TO_PRODUCTION" not in prompt_context
+
+
+def test_micro_question_prompt_does_not_assume_every_case_is_a_drawing_revision():
+    original = make_request()
+    other_case = original.current_case.model_copy(
+        update={"issue_type": "MATERIAL_ISSUE", "action": "TRANSFER_TO_PRODUCTION"}
+    )
+    other_pattern = original.matched_pattern.model_copy(
+        update={
+            "majority_action": "MATERIAL_REQUEST",
+            "action_distribution": {"MATERIAL_REQUEST": 4, "TRANSFER_TO_PRODUCTION": 1},
+        }
+    )
+    request = original.model_copy(update={"current_case": other_case, "matched_pattern": other_pattern})
+
+    current_case, matched_pattern = micro_question_context(request)
+
+    assert current_case["이번에 한 처리"] == "생산 부서로 넘겨 처리"
+    assert matched_pattern["가장 많이 했던 처리"] == "필요한 자재 요청"
+    assert "도면 개정" not in compact_json({"current_case": current_case, "matched_pattern": matched_pattern})
 
 
 def test_micro_question_uses_lcel_chain_and_hides_internal_terms():

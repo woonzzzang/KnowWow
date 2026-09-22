@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.knowflow.domain.CommentCase;
@@ -193,7 +195,10 @@ public class KnowFlowController {
     private OrganizationPattern requireInterviewable(CommentCase item) {
         GapResult gap = patternService.gapFor(item);
         if (!gap.requiresInterview()) {
-            throw new IllegalArgumentException("Micro-interview is not required for: " + item.caseId());
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "이 업무는 과거의 일반적인 처리와 같아 추가 질문 대상이 아닙니다: " + item.caseId()
+            );
         }
         return patternService.patternFor(item).orElseThrow();
     }

@@ -50,6 +50,10 @@ class PatternServiceTest {
         GapResult gap = patternService.gapFor(dataStore.requireCase("CASE-001"));
         assertThat(gap.status()).isEqualTo("NONE");
         assertThat(gap.requiresInterview()).isFalse();
+
+        GapResult case004 = patternService.gapFor(dataStore.requireCase("CASE-004"));
+        assertThat(case004.status()).isEqualTo("NONE");
+        assertThat(case004.requiresInterview()).isFalse();
     }
 
     @Test
@@ -61,4 +65,3 @@ class PatternServiceTest {
         assertThat(variants).isGreaterThanOrEqualTo(3);
     }
 }
-

@@ -1,12 +1,3 @@
-import {
-  DEMO_CASES,
-  DEMO_DASHBOARD,
-  DEMO_EMPLOYEES,
-  DEMO_KNOWLEDGE,
-  DEMO_PATTERNS,
-  demoGapFor,
-  demoPatternFor,
-} from "./demo-data";
 import type {
   CommentCase,
   DashboardSummary,
@@ -32,41 +23,35 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export async function getEmployees(): Promise<Employee[]> {
-  try { return await request<Employee[]>("/api/employees"); } catch { return DEMO_EMPLOYEES; }
+  return request<Employee[]>("/api/employees");
 }
 
 export async function getDashboard(employeeId = "EMP-001"): Promise<DashboardSummary> {
-  try { return await request<DashboardSummary>(`/api/dashboard?employeeId=${employeeId}`); }
-  catch { return {...DEMO_DASHBOARD, employee_id: employeeId}; }
+  return request<DashboardSummary>(`/api/dashboard?employeeId=${employeeId}`);
 }
 
 export async function getCases(): Promise<CommentCase[]> {
-  try { return await request<CommentCase[]>("/api/cases"); } catch { return DEMO_CASES; }
+  return request<CommentCase[]>("/api/cases");
 }
 
 export async function getCase(caseId: string): Promise<CommentCase> {
-  try { return await request<CommentCase>(`/api/cases/${caseId}`); }
-  catch { return DEMO_CASES.find((item) => item.case_id === caseId) ?? DEMO_CASES[0]; }
+  return request<CommentCase>(`/api/cases/${caseId}`);
 }
 
 export async function getPattern(caseItem: CommentCase): Promise<OrganizationPattern> {
-  try { return await request<OrganizationPattern>(`/api/cases/${caseItem.case_id}/pattern`); }
-  catch { return demoPatternFor(caseItem); }
+  return request<OrganizationPattern>(`/api/cases/${caseItem.case_id}/pattern`);
 }
 
 export async function getGap(caseItem: CommentCase): Promise<GapResult> {
-  try { return await request<GapResult>(`/api/cases/${caseItem.case_id}/gap`); }
-  catch { return demoGapFor(caseItem); }
+  return request<GapResult>(`/api/cases/${caseItem.case_id}/gap`);
 }
 
 export async function getPatterns(): Promise<OrganizationPattern[]> {
-  try { return await request<OrganizationPattern[]>("/api/organization/patterns"); }
-  catch { return DEMO_PATTERNS; }
+  return request<OrganizationPattern[]>("/api/organization/patterns");
 }
 
 export async function getKnowledge(employeeId = "EMP-001"): Promise<PersonalKnowledge[]> {
-  try { return await request<PersonalKnowledge[]>(`/api/employees/${employeeId}/knowledge`); }
-  catch { return DEMO_KNOWLEDGE.filter((item) => item.employee_id === employeeId); }
+  return request<PersonalKnowledge[]>(`/api/employees/${employeeId}/knowledge`);
 }
 
 export async function createMicroQuestion(caseId: string): Promise<string> {
@@ -95,4 +80,3 @@ export async function askAgent(query: string, employeeId = "EMP-001") {
     body: JSON.stringify({query, employee_id: employeeId}),
   });
 }
-
